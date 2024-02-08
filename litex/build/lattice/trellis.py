@@ -145,7 +145,11 @@ class LatticeTrellisToolchain(YosysNextPNRToolchain):
         "lfe5um5g-85f": "um5g-85k",
     }
 
-    def add_period_constraint(self, platform, clk, period):
+    def add_period_constraint(self, platform, clk, period, keep=True, name=None):
+        if clk is None:
+            return
+        if hasattr(clk, "p"):
+            clk = clk.p
         platform.add_platform_command("""FREQUENCY PORT "{clk}" {freq} MHz;""".format(
             freq=str(float(1/period)*1000), clk="{clk}"), clk=clk)
 

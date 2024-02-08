@@ -23,13 +23,14 @@ class EfinixPlatform(GenericPlatform):
 
     _supported_toolchains = ["efinity"]
 
-    def __init__(self, *args, iobank_info=None, toolchain="efinity", spi_mode="active", **kwargs):
+    def __init__(self, *args, iobank_info=None, toolchain="efinity", spi_mode="active", spi_width="1", **kwargs):
         GenericPlatform.__init__(self, *args, **kwargs)
 
         self.timing_model = self.device[-2:]
         self.device       = self.device[:-2]
         self.iobank_info  = iobank_info
         self.spi_mode     = spi_mode
+        self.spi_width    = spi_width
         if self.device[:2] == "Ti":
             self.family = "Titanium"
         else:
@@ -56,17 +57,14 @@ class EfinixPlatform(GenericPlatform):
     def get_verilog(self, *args, special_overrides=dict(), **kwargs):
         so = dict(common.efinix_special_overrides)
         so.update(special_overrides)
-        return GenericPlatform.get_verilog(self, *args, special_overrides=so,
-            attr_translate=self.toolchain.attr_translate, **kwargs)
+        return GenericPlatform.get_verilog(self, *args,
+            special_overrides = so,
+            attr_translate    = self.toolchain.attr_translate,
+            **kwargs
+        )
 
     def build(self, *args, **kwargs):
         return self.toolchain.build(self, *args, **kwargs)
-
-    def add_period_constraint(self, clk, period):
-        if clk is None: return
-        if hasattr(clk, "p"):
-            clk = clk.p
-        self.toolchain.add_period_constraint(self, clk, period)
 
     def add_false_path_constraint(self, from_, to):
         if hasattr(from_, "p"):
@@ -122,6 +120,11 @@ class EfinixPlatform(GenericPlatform):
                     return ret
         return None
 
+    def get_pin(self, sig):
+        while isinstance(sig, _Slice) and hasattr(sig, "value"):
+            sig = sig.value
+        return sig
+
     def get_pin_name(self, sig, without_index=False):
         if sig is None:
             return None
@@ -143,6 +146,19 @@ class EfinixPlatform(GenericPlatform):
                 else:
                     return resource[0] + (f"{idx}" if slc else "")
         return None
+
+    def get_pad_name(self, sig):
+        """ Return pin name (GPIOX_Y_ZZZ).
+
+        Parameters
+        ==========
+        sig: Signal
+            Signal for which pad name is searched.
+        """
+        if sig is None:
+            return None
+        pin = self.get_pin_location(sig)[0]
+        return self.parser.get_pad_name_from_pin(pin)
 
     def get_sig_constraint(self, sig):
         sc = self.constraint_manager.get_sig_constraints()

@@ -37,13 +37,6 @@
 #include <libfatfs/ff.h>
 
 /*-----------------------------------------------------------------------*/
-/* Helpers                                                               */
-/*-----------------------------------------------------------------------*/
-
-#define max(x, y) (((x) > (y)) ? (x) : (y))
-#define min(x, y) (((x) < (y)) ? (x) : (y))
-
-/*-----------------------------------------------------------------------*/
 /* Boot                                                                  */
 /*-----------------------------------------------------------------------*/
 
@@ -106,7 +99,7 @@ void romboot(void)
 #ifdef CSR_UART_BASE
 
 #define ACK_TIMEOUT_DELAY CONFIG_CLOCK_FREQUENCY/4
-#define CMD_TIMEOUT_DELAY CONFIG_CLOCK_FREQUENCY/16
+#define CMD_TIMEOUT_DELAY CONFIG_CLOCK_FREQUENCY/4
 
 static void timer0_load(unsigned int value) {
 	timer0_en_write(0);
@@ -311,7 +304,11 @@ int serialboot(void)
 #define TFTP_SERVER_PORT 69
 #endif
 
+#ifdef MACADDR1
+static unsigned char macadr[6] = {MACADDR1, MACADDR2, MACADDR3, MACADDR4, MACADDR5, MACADDR6};
+#else
 static unsigned char macadr[6] = {0x10, 0xe2, 0xd5, 0x00, 0x00, 0x00};
+#endif
 
 #ifdef LOCALIP1
 static unsigned int local_ip[4] = {LOCALIP1, LOCALIP2, LOCALIP3, LOCALIP4};
@@ -664,7 +661,7 @@ void flashboot(void)
 /* SDCard Boot                                                           */
 /*-----------------------------------------------------------------------*/
 
-#if defined(CSR_SPISDCARD_BASE) || defined(CSR_SDCORE_BASE)
+#if defined(CSR_SPISDCARD_BASE) || defined(CSR_SDCARD_CORE_BASE)
 
 static int copy_file_from_sdcard_to_ram(const char * filename, unsigned long ram_address)
 {
@@ -821,7 +818,7 @@ void sdcardboot(void)
 	printf("Booting from SDCard in SPI-Mode...\n");
 	fatfs_set_ops_spisdcard();	/* use spisdcard disk access ops */
 #endif
-#ifdef CSR_SDCORE_BASE
+#ifdef CSR_SDCARD_CORE_BASE
 	printf("Booting from SDCard in SD-Mode...\n");
 	fatfs_set_ops_sdcard();		/* use sdcard disk access ops */
 #endif

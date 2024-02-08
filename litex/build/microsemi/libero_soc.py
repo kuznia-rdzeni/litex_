@@ -187,10 +187,13 @@ class MicrosemiLiberoSoCPolarfireToolchain(GenericToolchain):
     def build_timing_constraints(self, vns):
         sdc = []
 
-        for clk, period in sorted(self.clocks.items(), key=lambda x: x[0].duid):
+        for clk, [period, name] in sorted(self.clocks.items(), key=lambda x: x[0].duid):
+            clk_sig = self._vns.get_name(clk)
+            if name is None:
+                name = clk_sig
             sdc.append(
-                "create_clock -name {clk} -period " + str(period) +
-                " [get_nets {clk}]".format(clk=vns.get_name(clk)))
+                "create_clock -name {name} -period " + str(period) +
+                " [get_nets {clk}]".format(name=name, clk=clk_sig))
         for from_, to in sorted(self.false_paths,
                                 key=lambda x: (x[0].duid, x[1].duid)):
             sdc.append(
@@ -235,13 +238,6 @@ class MicrosemiLiberoSoCPolarfireToolchain(GenericToolchain):
 
         if subprocess.call(shell + [script]) != 0:
             raise OSError("Subprocess failed")
-
-    def add_period_constraint(self, platform, clk, period):
-        if clk in self.clocks:
-            if period != self.clocks[clk]:
-                raise ValueError("Clock already constrained to {:.2f}ns, new constraint to {:.2f}ns"
-                    .format(self.clocks[clk], period))
-        self.clocks[clk] = period
 
     def add_false_path_constraint(self, platform, from_, to):
         if (to, from_) not in self.false_paths:
