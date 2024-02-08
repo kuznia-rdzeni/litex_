@@ -1,7 +1,7 @@
 #
 # This file is part of LiteX.
 #
-# Copyright (c) 2023 Piotr Wegrzyn (Kuznia Rdzeni)
+# Copyright (c) 2023-2024 Piotr Wegrzyn (Kuznia Rdzeni)
 # SPDX-License-Identifier: BSD-2-Clause
 
 import os
@@ -24,16 +24,9 @@ CPU_VARIANTS = {
 # GCC Flags ----------------------------------------------------------------------------------------
 
 GCC_FLAGS = {
-    #                               /------------ Base ISA
-    #                               |    /------- Hardware Multiply + Divide
-    #                               |    |/----- Atomics
-    #                               |    ||/---- Compressed ISA
-    #                               |    |||/--- Single-Precision Floating-Point
-    #                               |    ||||/-- Double-Precision Floating-Point
-    #                               i    macfd
-    "minimal":          "-march=rv32i2p0       -mabi=ilp32 ",
-    "standard":         "-march=rv32i2p0       -mabi=ilp32 ",
-    "full":             "-march=rv32i2p0_m     -mabi=ilp32 -mno-div ",
+    "minimal":          "-march=rv32e2p1            -mabi=ilp32 ",
+    "standard":         "-march=rv32i2p1_zicsr      -mabi=ilp32 ",
+    "full":             "-march=rv32i2p1_mcbzicsr   -mabi=ilp32 ",
 }
 
 # Coreblocks ----------------------------------------------------------------------------------------
