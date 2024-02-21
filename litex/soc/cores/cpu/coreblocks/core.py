@@ -25,7 +25,7 @@ CPU_VARIANTS = {
 
 GCC_FLAGS = {
     "minimal":          "-march=rv32e2p1            -mabi=ilp32 ",
-    "standard":         "-march=rv32i2p1_zicsr      -mabi=ilp32 ",
+    "standard":         "-march=rv32im2p1_zicsr      -mabi=ilp32 ",
     "full":             "-march=rv32i2p1_mc_zba_zbb_zbc_zbs_zicsr   -mabi=ilp32 ",
 }
 

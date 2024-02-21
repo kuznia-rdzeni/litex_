@@ -87,6 +87,11 @@ static void help(void)
 	puts("led                - Led demo");
 #endif
 	puts("donut              - Spinning Donut demo");
+	puts("donut2             - Spinning Donut demo (no multiplication)");
+	puts("mandelbrot         - Mandelbrot fractal renderer");
+	puts("nyancat            - Cat");
+	puts("spirograph         - Contains flashing images");
+	puts("qrcode             - Generate QR code");
 	puts("helloc             - Hello C");
 #ifdef WITH_CXX
 	puts("hellocpp           - Hello C++");
@@ -142,6 +147,12 @@ static void donut_cmd(void)
 	donut();
 }
 
+extern void donut2(void);
+extern void mandelbrot(void);
+extern void nyancat(void);
+extern void spirograph(void);
+extern void qrcode(void);
+
 extern void helloc(void);
 
 static void helloc_cmd(void)
@@ -184,6 +195,16 @@ static void console_service(void)
 		donut_cmd();
 	else if(strcmp(token, "helloc") == 0)
 		helloc_cmd();
+	else if(strcmp(token, "donut2") == 0)
+		donut2();
+	else if(strcmp(token, "mandelbrot") == 0)
+		mandelbrot();
+	else if(strcmp(token, "nyancat") == 0)
+		nyancat();
+	else if(strcmp(token, "spirograph") == 0)
+		spirograph();
+	else if(strcmp(token, "qrcode") == 0)
+		qrcode();
 #ifdef WITH_CXX
 	else if(strcmp(token, "hellocpp") == 0)
 		hellocpp_cmd();
