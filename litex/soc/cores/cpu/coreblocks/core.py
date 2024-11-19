@@ -42,7 +42,7 @@ class Coreblocks(CPU):
     gcc_triple           = CPU_GCC_TRIPLE_RISCV32
     linker_output_format = "elf32-littleriscv"
     nop                  = "nop"
-    io_regions           = {0x8000_0000: 0x8000_0000} # Origin, Length.
+    io_regions           = {0xe000_0000: 0x1000_0000} # Origin, Length.
 
     # GCC Flags.
     @property
@@ -56,7 +56,8 @@ class Coreblocks(CPU):
         self.variant      = variant
         self.human_name   = f"Coreblocks-{CPU_VARIANTS[variant]}"
         self.reset        = Signal()
-        # self.interrupt    = Signal(32) # commenting out disables feature!
+        self.interrupt    = Signal(16) # hart-local 16 platform interrupts - ids 16+n
+
         self.ibus         = ibus = wishbone.Interface()
         self.dbus         = dbus = wishbone.Interface()
         self.periph_buses = [self.ibus, self.dbus] # Peripheral buses (Connected to main SoC's bus).
@@ -64,15 +65,17 @@ class Coreblocks(CPU):
 
         # # #
 
+        self.interrupts_full = Signal(32)
+        # Shift interrupts to platform range
+        self.comb += self.interrupts_full.eq(self.interrupt << 16)
+
         self.cpu_params = dict(
             # Clk / Rst.
             i_clk = ClockSignal("sys"),
             i_rst = ResetSignal("sys") | self.reset,
 
             ## IRQ.
-            #i_timer_interrupt    = 0,
-            #i_software_interrupt = 0,
-            #i_external_interrupt = self.interrupt,
+            i_interrupts = self.interrupts_full,
 
             # Ibus.
             o_wb_instr__stb   = ibus.stb,

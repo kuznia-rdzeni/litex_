@@ -1,5 +1,3 @@
-#define MIE_MEIE 	0x800
-
 	.global _start
 _start:
 	j reset_vector
@@ -7,7 +5,7 @@ _start:
 reset_vector:
 	la sp, _fstack
 	la t0, trap_vector
-	// csrw mtvec, t0
+	csrw mtvec, t0
 
 	// initialize .data
 	la t0, _fdata
@@ -29,11 +27,9 @@ reset_vector:
 	addi t0, t0, 4
 	j 1b
 3:
-	// enable external interrupts
-	li t0, MIE_MEIE
-	// csrs mie, t0
 
 	call main
+
 1:	j 1b
 
 trap_vector:
