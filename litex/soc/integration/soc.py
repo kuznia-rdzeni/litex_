@@ -1745,6 +1745,7 @@ class LiteXSoC(SoC):
         # Imports
         from liteeth.mac import LiteEthMAC
         from liteeth.phy.model import LiteEthPHYModel
+        from litex.build.altera.quartus import AlteraQuartusToolchain
 
         # MAC.
         assert data_width in [8, 32]
@@ -1761,7 +1762,9 @@ class LiteXSoC(SoC):
             ntxslots   = ntxslots, txslots_write_only = txslots_write_only,
             timestamp  = None if not with_timestamp else self.timer0.uptime_cycles,
             with_preamble_crc = not software_debug,
-            with_sys_datapath = with_sys_datapath)
+            with_sys_datapath = with_sys_datapath,
+            full_memory_we = isinstance(self.platform.toolchain, AlteraQuartusToolchain)
+        )
         if not with_sys_datapath:
             # Use PHY's eth_tx/eth_rx clock domains.
             ethmac = ClockDomainsRenamer({
