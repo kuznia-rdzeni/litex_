@@ -10,8 +10,9 @@ import subprocess
 from migen import *
 
 from litex import get_data_mod
-from litex.soc.interconnect import wishbone
 from litex.soc.cores.cpu import CPU, CPU_GCC_TRIPLE_RISCV32
+from litex.soc.interconnect import wishbone
+from litex.soc.integration.soc import SoCRegion
 
 # Variants -----------------------------------------------------------------------------------------
 
@@ -99,6 +100,20 @@ class Coreblocks(CPU):
             i_wb_data__err   = dbus.err,
             i_wb_data__dat_r = dbus.dat_r,
         )
+
+    # Memory Mapping.
+    @property
+    def mem_map(self):
+        # Default Memory Map.
+        # In Coreblocks MMIO region is set to 0xe000_0000 - 0xffff_fffff by default configuration. It can be changed with `CoreConfiguration`.
+        # Remaps `csr` to that region. Other segements can be arbitraily overwritten.
+        return {
+            "rom":      0x0000_0000,
+            "sram":     0x0100_0000,
+            "main_ram": 0x4000_0000,
+            "csr":      0xe000_0000,
+        }
+
 
     def set_reset_address(self, reset_address):
         self.reset_address = reset_address
