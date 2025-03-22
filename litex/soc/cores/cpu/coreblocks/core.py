@@ -26,8 +26,8 @@ CPU_VARIANTS = {
 
 GCC_FLAGS = {
     "minimal":          "-march=rv32e2p1                      -mabi=ilp32 ",
-    "standard":         "-march=rv32i2p1_mzicsr_zifencei      -mabi=ilp32 ",
-    "full":             "-march=rv32i2p1_mcbzicsr_zifencei    -mabi=ilp32 ",
+    "standard":         "-march=rv32i2p1_mazicsr_zifencei     -mabi=ilp32 ",
+    "full":             "-march=rv32i2p1_maczicsr_zifencei    -mabi=ilp32 ",
 }
 
 # Coreblocks ----------------------------------------------------------------------------------------
@@ -107,13 +107,17 @@ class Coreblocks(CPU):
         # Default Memory Map.
         # In Coreblocks MMIO region is set to 0xe000_0000 - 0xffff_fffff by default configuration. It can be changed with `CoreConfiguration`.
         # Remaps `csr` to that region. Other segements can be arbitraily overwritten.
+        # In Coreblocks only clint address is fixed.
         return {
             "rom":      0x0000_0000,
             "sram":     0x0100_0000,
             "main_ram": 0x4000_0000,
             "csr":      0xe000_0000,
+            "clint":    0xe100_0000,
         }
 
+    def add_soc_components(self, soc):
+        soc.bus.add_region("clint", SoCRegion(origin=soc.mem_map.get("clint"), size=0xC000, cached=False, linker=True))
 
     def set_reset_address(self, reset_address):
         self.reset_address = reset_address
@@ -124,6 +128,7 @@ class Coreblocks(CPU):
         cli_params = []
         cli_params.append("--output={}".format(verilog_filename))
         cli_params.append("--config={}".format(CPU_VARIANTS[variant]))
+        cli_params.append("--soc")
         #cli_params.append("--reset-addr={}".format(reset_address))
         sdir = get_data_mod("cpu", "coreblocks").data_location
         if subprocess.call(["python3", os.path.join(sdir, "scripts", "gen_verilog.py"), *cli_params]):

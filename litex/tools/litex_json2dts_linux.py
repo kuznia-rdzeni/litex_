@@ -21,7 +21,7 @@ def generate_dts(d, initrd_start=None, initrd_size=None, initrd=None, root_devic
     cpu_count  = int(d["constants"].get("config_cpu_count", 1))
     cpu_name   = d["constants"].get("config_cpu_name")
     cpu_family = d["constants"].get("config_cpu_family")
-    cpu_isa    = d["constants"].get("config_cpu_isa", None)
+    cpu_isa    = "rv32ima"#d["constants"].get("config_cpu_isa", None)
     cpu_mmu    = d["constants"].get("config_cpu_mmu", None)
 
     # Header ---------------------------------------------------------------------------------------
@@ -355,24 +355,6 @@ def generate_dts(d, initrd_start=None, initrd_size=None, initrd=None, root_devic
 """
         else:
             extra_attr = ""
-
-        dts += """
-            intc0: interrupt-controller@{plic_base:x} {{
-                compatible = "sifive,fu540-c000-plic", "sifive,plic-1.0.0";
-                reg = <0x{plic_base:x} 0x400000>;
-                #address-cells = <0>;
-                #interrupt-cells = <1>;
-                interrupt-controller;
-                interrupts-extended = <
-                    {cpu_mapping}>;
-                riscv,ndev = <32>;
-                {extra_attr}
-            }};
-""".format(
-        plic_base   = d["memories"]["plic"]["base"],
-        cpu_mapping = ("\n" + " "*20).join(["&L{} 11 &L{} 9".format(cpu, cpu) for cpu in range(cpu_count)]),
-        extra_attr  = extra_attr)
-
     elif cpu_family == "or1k":
         dts += """
             intc0: interrupt-controller {
